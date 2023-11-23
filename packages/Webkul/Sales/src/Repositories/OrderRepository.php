@@ -9,24 +9,62 @@ use Illuminate\Support\Facades\Log;
 use Webkul\Core\Eloquent\Repository;
 use Webkul\Sales\Contracts\Order;
 use Webkul\Sales\Generators\OrderSequencer;
-use Webkul\Sales\Models\Order as OrderModel;
+use Webkul\Rewards\Repositories\RewardPointRepository;
+use Webkul\Rewards\Helpers\CartHelper as RewardCartHelper;
 
 class OrderRepository extends Repository
 {
+    /**
+     * OrderItemRepository $orderItemRepository
+     *
+     * @var \Webkul\Sales\Repositories\OrderItemRepository
+     */
+    protected $orderItemRepository;
+
+    	
+     /**
+     * OrderItemRepository object
+     *
+     * @var \Webkul\Sales\Repositories\RewardPointRepository
+     */
+    protected $rewardPointRepository;
+     /**
+     * RewardCartHelper object
+     *
+     * @var \Webkul\Sales\Repositories\RewardPointRepository
+     */
+    protected $rewardCartHelper;
+    
+
+    /**
+     * DownloadableLinkPurchasedRepository $downloadableLinkPurchasedRepository
+     *
+     * @var \Webkul\Sales\Repositories\DownloadableLinkPurchasedRepository
+     */
+    protected $downloadableLinkPurchasedRepository;
+
     /**
      * Create a new repository instance.
      *
      * @param  \Webkul\Sales\Repositories\OrderItemRepository  $orderItemRepository
      * @param  \Webkul\Sales\Repositories\DownloadableLinkPurchasedRepository  $downloadableLinkPurchasedRepository
      * @param  \Illuminate\Container\Container  $app
+     * @param \Webkul\Rewards\Helpers\CartHelper as RewardCartHelper $rewardCartHelper
      * @return void
      */
     public function __construct(
-        protected OrderItemRepository $orderItemRepository,
-        protected DownloadableLinkPurchasedRepository $downloadableLinkPurchasedRepository,
+        OrderItemRepository $orderItemRepository,
+        DownloadableLinkPurchasedRepository $downloadableLinkPurchasedRepository,
+        RewardPointRepository $rewardPointRepository,
+        RewardCartHelper $rewardCartHelper,
         App $app
-    )
-    {
+    ) {
+        $this->orderItemRepository = $orderItemRepository;
+
+        $this->downloadableLinkPurchasedRepository = $downloadableLinkPurchasedRepository;
+        $this->rewardPointRepository = $rewardPointRepository;
+        $this->rewardCartHelper = $rewardCartHelper;
+
         parent::__construct($app);
     }
 
@@ -74,17 +112,13 @@ class OrderRepository extends Repository
             $order->payment()->create($data['payment']);
 
             if (isset($data['shipping_address'])) {
-                unset($data['shipping_address']['customer_id']);
-
                 $order->addresses()->create($data['shipping_address']);
             }
-
-            unset($data['billing_address']['customer_id']);
 
             $order->addresses()->create($data['billing_address']);
 
             foreach ($data['items'] as $item) {
-                Event::dispatch('checkout.order.orderitem.save.before', $data);
+                Event::dispatch('checkout.order.orderitem.save.before', [$data]);
 
                 $orderItem = $this->orderItemRepository->create(array_merge($item, ['order_id' => $order->id]));
 
@@ -98,19 +132,17 @@ class OrderRepository extends Repository
 
                 $this->downloadableLinkPurchasedRepository->saveLinks($orderItem, 'available');
 
-                Event::dispatch('checkout.order.orderitem.save.after', $data);
+                Event::dispatch('checkout.order.orderitem.save.after', [$data]);
             }
 
-            Event::dispatch('checkout.order.save.after', $order);
+            Event::dispatch('checkout.order.save.after', [$order]);
         } catch (\Exception $e) {
             /* rolling back first */
             DB::rollBack();
 
             /* storing log for errors */
-            Log::error(
-                'OrderRepository:createOrderIfNotThenRetry: ' . $e->getMessage(),
-                ['data' => $data]
-            );
+            Log::error('OrderRepository:createOrderIfNotThenRetry: ' . $e->getMessage(),
+            ['data' => $data]);
 
             /* recalling */
             $this->createOrderIfNotThenRetry($data);
@@ -149,7 +181,7 @@ class OrderRepository extends Repository
             return false;
         }
 
-        Event::dispatch('sales.order.cancel.before', $order);
+        Event::dispatch('sales.order.cancel.before', [$order]);
 
         foreach ($order->items as $item) {
             if (! $item->qty_to_cancel) {
@@ -190,7 +222,7 @@ class OrderRepository extends Repository
 
         $this->updateOrderStatus($order);
 
-        Event::dispatch('sales.order.cancel.after', $order);
+        Event::dispatch('sales.order.cancel.after', [$order]);
 
         return true;
     }
@@ -220,7 +252,7 @@ class OrderRepository extends Repository
             $totalQtyInvoiced += $item->qty_invoiced;
 
             if (! $item->isStockable()) {
-                $totalQtyShipped += $item->qty_invoiced;
+                $totalQtyShipped += $item->qty_ordered;
             } else {
                 $totalQtyShipped += $item->qty_shipped;
             }
@@ -229,19 +261,9 @@ class OrderRepository extends Repository
             $totalQtyCanceled += $item->qty_canceled;
         }
 
-        if (
-            $totalQtyOrdered != ($totalQtyRefunded + $totalQtyCanceled)
+        if ($totalQtyOrdered != ($totalQtyRefunded + $totalQtyCanceled)
             && $totalQtyOrdered == $totalQtyInvoiced + $totalQtyCanceled
-            && $totalQtyOrdered == $totalQtyShipped + $totalQtyRefunded + $totalQtyCanceled
-        ) {
-            return true;
-        }
-
-        /**
-         * If order is already completed and total quantity ordered is not equal to refunded
-         * then it can be considered as completed.
-         */
-        if ($order->status === OrderModel::STATUS_COMPLETED && $totalQtyOrdered != $totalQtyRefunded) {
+            && $totalQtyOrdered == $totalQtyShipped + $totalQtyRefunded + $totalQtyCanceled) {
             return true;
         }
 
@@ -294,9 +316,7 @@ class OrderRepository extends Repository
      */
     public function updateOrderStatus($order, $orderState = null)
     {
-        Event::dispatch('sales.order.update-status.before', $order);
-
-        if (! empty($orderState)) {
+        if (!empty($orderState)) {
             $status = $orderState;
         } else {
             $status = "processing";
@@ -314,8 +334,7 @@ class OrderRepository extends Repository
 
         $order->status = $status;
         $order->save();
-
-        Event::dispatch('sales.order.update-status.after', $order);
+        $this->rewardPointRepository->updateStatus($order,$status);
     }
 
     /**
@@ -346,9 +365,22 @@ class OrderRepository extends Repository
             $order->base_discount_invoiced += $invoice->base_discount_amount;
         }
 
+        $redemptions ='';
+        if($order->points) {
+            $redemptions = $this->rewardCartHelper->redemption($order->points);     
+        }
+
+
         $order->grand_total_invoiced = $order->sub_total_invoiced + $order->shipping_invoiced + $order->tax_amount_invoiced - $order->discount_invoiced;
         $order->base_grand_total_invoiced = $order->base_sub_total_invoiced + $order->base_shipping_invoiced + $order->base_tax_amount_invoiced - $order->base_discount_invoiced;
 
+
+        if($redemptions && $order->grand_total_invoiced){
+            $order->grand_total_invoiced -=  (float)$redemptions;
+            $order->base_grand_total_invoiced -=   (float)$redemptions;  
+         }
+
+         
         // order refund total
         $order->sub_total_refunded = $order->base_sub_total_refunded = 0;
         $order->shipping_refunded = $order->base_shipping_refunded = 0;
@@ -389,7 +421,7 @@ class OrderRepository extends Repository
      */
     private function resolveOrderInstance($orderOrId)
     {
-        return $orderOrId instanceof OrderModel
+        return $orderOrId instanceof \Webkul\Sales\Models\Order
             ? $orderOrId
             : $this->findOrFail($orderOrId);
     }

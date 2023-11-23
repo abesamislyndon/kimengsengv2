@@ -1,13 +1,32 @@
 <div class="tabs">
-    @if (request()->route()->getName() != 'admin.configuration.index')
+    
+    @if(request()->segment(1).'/'.request()->segment(2)  === 'admin/rewards')
+
+        <?php  $keys = explode('.', $menu->currentKey);  ?>
+        
+        @if ($items = \Illuminate\Support\Arr::get($menu->items, implode('.children.', array_slice($keys, 0, 2)) . '.children'))
+        
+        <ul>
+
+            @foreach ($items as $key => $item)
+            
+                <li class="{{ URL::current() == $item['url'] ? 'active' : '' }}">
+                    <a href="{{ route($item['route']) }}">
+                        {{ trans($item['name']) }}
+                    </a>
+                </li>
+
+            @endforeach
+
+        </ul>
+        @endif
+        
+    @elseif (request()->route()->getName() != 'admin.configuration.index')
 
         <?php $keys = explode('.', $menu->currentKey);  ?>
 
-
         @if ($items = \Illuminate\Support\Arr::get($menu->items, implode('.children.', array_slice($keys, 0, 2)) . '.children'))
-
             <ul>
-
                 @foreach (\Illuminate\Support\Arr::get($menu->items, implode('.children.', array_slice($keys, 0, 2)) . '.children') as $item)
 
                     <li class="{{ $menu->getActive($item) }}">
@@ -17,9 +36,7 @@
                     </li>
 
                 @endforeach
-
             </ul>
-
         @endif
 
     @else
