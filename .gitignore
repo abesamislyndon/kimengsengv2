@@ -24,5 +24,6 @@ package-lock.json
 /storage/*.key
 /storage/dcc-data/
 /vendor
+/config/scout.php
 yarn.lock
 yarn-error.log
