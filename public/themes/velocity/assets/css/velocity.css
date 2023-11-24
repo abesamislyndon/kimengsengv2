@@ -8747,8 +8747,39 @@ header #search-form #header-search-icon {
   text-align: center !important;
 }
 
+.product-category-page {
+  margin-top: 90px;
+  margin-bottom: 30px;
+}
+.product-category-page .text-dark {
+  font-family: SourceSansPro-Semibold;
+  font-weight: bolder;
+  font-size: 0.7em;
+}
+.product-category-page .card-body {
+  z-index: 2;
+  border: none !important;
+}
+
+.circle-category {
+  background-color: #e8e8e8;
+  width: 150px;
+  height: 150px;
+  position: absolute;
+  z-index: 1;
+}
+
 .grid-card img {
   width: 100%;
+}
+
+.product-price {
+  display: none;
+}
+
+.payment-method-header {
+  font-size: 14px;
+  color: #000;
 }
 
 /*# sourceMappingURL=velocity.css.map */

@@ -8552,6 +8552,7 @@ i.within-circle {
 //     //  z-index: 1;
 // }
 
+
 #search-form {
     input{
         border: 1px solid #e8e8e8 !important;
@@ -8610,7 +8611,6 @@ header #search-form #header-search-icon {
 }
 
 //    OUR PRODUCTS LANDING PAGE
-
 
 .landing-about-us{
     margin-top:120px;
@@ -8840,10 +8840,41 @@ header #search-form #header-search-icon {
 
 // product cards
 
+.product-category-page{
+    margin-top: 90px;
+    margin-bottom: 30px;
+
+    .text-dark{
+        font-family: SourceSansPro-Semibold;
+        font-weight: bolder;
+        font-size: 0.7em;
+    }
+    .card-body{
+        z-index:2;
+        border: none !important;
+    }
+}
+.circle-category{
+    background-color: rgb(232, 232, 232);
+     width:150px;
+     height: 150px;
+     position: absolute;
+     z-index:1;
+}
+
 .grid-card{
    
     img{
         width:100%;
     }
 }
+.product-price{
+    display: none;
+}
+
+.payment-method-header{
+    font-size: 14px;
+    color: #000;
+}
+
 

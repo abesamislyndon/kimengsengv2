@@ -84,6 +84,6 @@ Route::group(['middleware' => ['web', 'locale', 'theme', 'currency']], function 
 
     Route::get('products/get-category-product-maximum-price/{categoryId?}', [ProductController::class, 'getCategoryProductMaximumPrice'])->name('admin.catalog.products.get-category-product-maximum-price');
 
-    Route::get('/all-categories', [CategoryController::class, 'allCategories'])->name('all-categories');
+    Route::get('/product-category', [CategoryController::class, 'allCategories'])->name('all-categories');
 
 });
