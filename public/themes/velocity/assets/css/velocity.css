@@ -8748,17 +8748,59 @@ header #search-form #header-search-icon {
 }
 
 .product-category-page {
-  margin-top: 90px;
+  margin-top: 30px;
   margin-bottom: 30px;
-}
-.product-category-page .text-dark {
-  font-family: SourceSansPro-Semibold;
-  font-weight: bolder;
-  font-size: 0.7em;
+  background-color: #F8F8F8;
+  width: 100%;
+  padding: 30px;
 }
 .product-category-page .card-body {
   z-index: 2;
   border: none !important;
+  padding: 0px;
+}
+.product-category-page .card-body a.text-dark {
+  color: #3d3d3d !important;
+  text-align: center !important;
+}
+.product-category-page .card-body img {
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+}
+.product-category-page .card-body .small-circle {
+  width: 50px;
+  height: 50px;
+  background-color: #222222;
+  position: absolute;
+  margin-left: 20px;
+  margin-top: 20px;
+  z-index: 1;
+  border-radius: 100px;
+}
+.product-category-page .card-body .small-circle span {
+  position: relative;
+  left: 20px;
+  top: 15px;
+  font-weight: 900;
+  font-family: Source Sans Pro, sans-serif;
+  color: #fff;
+}
+.product-category-page .card-body .card-header {
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+.product-category-page .card-body .card-header h3 {
+  height: 40px;
+  margin-top: 10px;
+  text-align: center;
+  font-family: SourceSansPro-Semibold;
+  font-weight: bolder;
+  font-size: 1.1em;
+}
+.product-category-page .card {
+  background-color: white;
+  padding: 0px !important;
+  border-radius: 20px !important;
 }
 
 .circle-category {
@@ -8780,6 +8822,13 @@ header #search-form #header-search-icon {
 .payment-method-header {
   font-size: 14px;
   color: #000;
+}
+
+.box-shadow {
+  border-width: 1px;
+  --tw-shadow: 0px 0px 0px 0px rgba(0,0,0,.03),0px 1px 1px 0px rgba(0,0,0,.03),0px 3px 3px 0px rgba(0,0,0,.03),0px 6px 4px 0px rgba(0,0,0,.02),0px 11px 4px 0px rgba(0,0,0,0),0px 17px 5px 0px rgba(0,0,0,0);
+  --tw-shadow-colored: 0px 0px 0px 0px var(--tw-shadow-color), 0px 1px 1px 0px var(--tw-shadow-color), 0px 3px 3px 0px var(--tw-shadow-color), 0px 6px 4px 0px var(--tw-shadow-color), 0px 11px 4px 0px var(--tw-shadow-color), 0px 17px 5px 0px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 /*# sourceMappingURL=velocity.css.map */

@@ -86,4 +86,8 @@ Route::group(['middleware' => ['web', 'locale', 'theme', 'currency']], function 
 
     Route::get('/product-category', [CategoryController::class, 'allCategories'])->name('all-categories');
 
+    // Route::get('/product-category/{id}', [CategoryController::class, 'getCategoryProducts'])->name('category.products');
+    Route::get('/product-category/{id}', [CategoryController::class, 'getCategoryProducts'])->name('category.products');
+    Route::get('/products/{categorySlug}', [CategoryController::class, 'getCategoryProducts'])->name('products.by.category');
+
 });

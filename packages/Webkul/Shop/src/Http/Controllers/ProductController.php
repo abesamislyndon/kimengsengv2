@@ -31,8 +31,7 @@ class ProductController extends Controller
         protected ProductDownloadableSampleRepository $productDownloadableSampleRepository,
         protected ProductDownloadableLinkRepository $productDownloadableLinkRepository,
         protected CategoryRepository $categoryRepository
-    )
-    {
+    ) {
         parent::__construct();
     }
 
@@ -46,13 +45,13 @@ class ProductController extends Controller
     public function download($productId, $attributeId)
     {
         $productAttribute = $this->productAttributeValueRepository->findOneWhere([
-            'product_id'   => $productId,
+            'product_id' => $productId,
             'attribute_id' => $attributeId,
         ]);
 
         return isset($productAttribute['text_value'])
-            ? Storage::download($productAttribute['text_value'])
-            : null;
+        ? Storage::download($productAttribute['text_value'])
+        : null;
     }
 
     /**
@@ -70,8 +69,8 @@ class ProductController extends Controller
                     $privateDisk = Storage::disk('private');
 
                     return $privateDisk->exists($productDownloadableLink->sample_file)
-                        ? $privateDisk->download($productDownloadableLink->sample_file)
-                        : abort(404);
+                    ? $privateDisk->download($productDownloadableLink->sample_file)
+                    : abort(404);
                 } else {
                     $fileName = substr($productDownloadableLink->sample_url, strrpos($productDownloadableLink->sample_url, '/') + 1);
 
@@ -114,7 +113,7 @@ class ProductController extends Controller
             $filterAttributes = $this->productFlatRepository->getFilterAttributes($category);
         }
 
-        if (! count($filterAttributes) > 0) {
+        if (!count($filterAttributes) > 0) {
             $filterAttributes = $attributeRepository->getFilterAttributes();
         }
 
@@ -140,4 +139,5 @@ class ProductController extends Controller
             'max_price' => $maxPrice,
         ]);
     }
+
 }

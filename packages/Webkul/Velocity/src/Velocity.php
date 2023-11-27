@@ -11,9 +11,9 @@ class Velocity
      *
      * @var array
      */
-	protected $content_type = [
+    protected $content_type = [
         // 'link'     => 'Link CMS Page',
-        // 'product'  => 'Catalog Products',
+        'product' => 'Catalog Products',
         // 'static'   => 'Static Content',
         'category' => 'Category Slug',
     ];
@@ -23,13 +23,13 @@ class Velocity
      *
      * @var array
      */
-	protected $catalog_type = [
-        'new'     => 'New Arrival',
-        'offer'   => 'Offered Product [Special]',
+    protected $catalog_type = [
+        'new' => 'New Arrival',
+        'offer' => 'Offered Product [Special]',
         'popular' => 'Popular Products',
-        'viewed'  => 'Most Viewed',
-        'rated'   => 'Most Rated',
-        'custom'  => 'Custom Selection',
+        'viewed' => 'Most Viewed',
+        'rated' => 'Most Rated',
+        'custom' => 'Custom Selection',
     ];
 
     /**
@@ -47,7 +47,7 @@ class Velocity
      */
     public function getContentType()
     {
-		return $this->content_type;
+        return $this->content_type;
     }
 
     /**
@@ -55,6 +55,6 @@ class Velocity
      */
     public function getCatalogType()
     {
-		return $this->catalog_type;
+        return $this->catalog_type;
     }
 }
